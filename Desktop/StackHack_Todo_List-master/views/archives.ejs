@@ -121,41 +121,43 @@
 
             <% for(var i=task.length-1;i>=0;i--){ %>
 
+                <% if(task[i].status==='completed'){ %>
 
-                <div class="blog-item">
 
-                    <div class="blog-content">
-                        <h1 class="blog-title a"> Title :
-                            <%=task[i].title%>
-                                <br> id :
-                                <%=task[i]._id%>
-                        </h1>
-                        <span class="blog-date a">Task Type :
-                            <%=task[i].taskType %>
-                        </span>
+                    <div class="blog-item">
 
-                        <p class="blog-caption a"> Body :
-                            <%=task[i].body%>
-                        </p>
-                        <p class="blog-caption a">
-                            Status :
-                            <%=task[i].status %>
-                                <br> Task Created at :
-                                <%=task[i].created%>
-                                    <br> Due date :
-                                    <%=task[i].dueDate%>
-                        </p>
-                        <a href='/home/<%=task[i]._id%>/edit' class="btn btn-primary a">
-                            <button>edit</button>
-                        </a>
-                        <form action="/home/<%=task[i]._id%>/delete?_method=DELETE" method="POST" style=" margin-top:20px;">
-                            <button type="submit" class="btn btn-danger a">delete</button>
-                        </form>
+                        <div class="blog-content">
+                            <h1 class="blog-title a"> Title :
+                                <%=task[i].title%>
+                                    <br> id :
+                                    <%=task[i]._id%>
+                            </h1>
+                            <span class="blog-date a">Task Type :
+                                <%=task[i].taskType %>
+                            </span>
 
+                            <p class="blog-caption a"> Body :
+                                <%=task[i].body%>
+                            </p>
+                            <p class="blog-caption a">
+                                Status :
+                                <%=task[i].status %>
+                                    Date :
+                                    <%=task[i].created%>
+
+                            </p>
+                            <a href='/home/<%=task[i]._id%>/edit' class="btn btn-primary a">
+                                <button>edit</button>
+                            </a>
+                            <form action="/home/<%=task[i]._id%>/delete?_method=DELETE" method="POST" style=" margin-top:20px;">
+                                <button type="submit" class="btn btn-danger a">delete</button>
+                            </form>
+
+                        </div>
                     </div>
-                </div>
 
-                <% }; %>
+                    <% }; %>
+                        <% }; %>
         </div>
     </div>
 

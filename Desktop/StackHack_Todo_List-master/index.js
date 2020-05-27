@@ -9,9 +9,8 @@ const app = express();
 
 var passport = require("passport"),
     LocalStrategy = require("passport-local"),
+    Task = require("./models/task"),
     User = require("./models/user");
-
-
 // APP CONFIG
 
 // Line:11 Parse incoming request bodies in a middleware before the handlers, available under the req.body property.
@@ -51,7 +50,7 @@ mongoose.connect( uri,{ useNewUrlParser: true ,useUnifiedTopology: true });
 //         console.log('Error in DB connection' + err)
 //     }
 
-
+// https://github.com/kapilguptaDTU/stackhack_todolist.git
 // });
 
 mongoose.set('useFindAndModify', false);
@@ -88,56 +87,76 @@ User.find({}, (err, docs) => {
 });
 
 
-// making schema 
-var taskSchema = new mongoose.Schema({
-    title: String,
-    body: String,
-    taskType: String,
-    status: String,
-    created: {
-        type: Date,
-        default: Date.now
-    }
-});
-mongoose.set('useFindAndModify', false);
-var Task = mongoose.model("Task", taskSchema);
 
+
+mongoose.set('useFindAndModify', false);
 // RESTFUL ROUTES
 
 app.get('/', (req, res) => {
     res.redirect("home");
 });
 
-app.get("/home", (req, res) => {
-    // task will contain value from all the entity in the database
-    Task.find({}, (err, task) => {
+
+app.get("/home", isLoggedIn, (req, res) => {
+    User.findById(req.user).populate("tasks").exec(function (err, reciever) {
+        
         if (err) {
-            console.log("error while recieving entries from the database");
+            console.log(err);
         } else {
+            console.log(reciever.username)
+            // console.log(reciever.tasks)
+            
             res.render("home.ejs", {
-                task: task
-            });
+                                task: reciever.tasks
+            
+                     });
         }
-    })
+    });
 });
 
-app.get('/new', (req, res) => {
+app.get("/archives", isLoggedIn, (req, res) => {
+    User.findById(req.user).populate("tasks").exec(function (err, reciever) {
+        
+        if (err) {
+            console.log(err);
+        } else {
+            console.log(reciever.username)
+            // console.log(reciever.tasks)
+            
+            res.render("archives.ejs", {
+                                task: reciever.tasks
+            
+                     });
+        }
+    });
+});
+
+
+
+
+
+app.get('/new',isLoggedIn, (req, res) => {
     res.render('todo/new');
 });
 
-app.post('/home', (req, res) => {
-    console.log(req.body);
+app.post('/home',isLoggedIn, (req, res) => {
+    // console.log(req.body);
     Task.create(req.body, (err, task) => {
         if (err) {
             console.log("err has occured while inserting an entry into the database");
         } else {
-            console.log(`a new task has been created : ${task}`);
+            // console.log(`a new task has been created : ${task}`);
+            task.creator=req.user._id;
+            req.user.tasks.push(task._id);
+            req.user.save();
+            task.save();
+            console.log(task.creator);
             res.redirect("/home");
         }
     });
 });
 
-app.get('/home/:id/edit', (req, res) => {
+app.get('/home/:id/edit',isLoggedIn, (req, res) => {
     Task.findById(req.params.id, (err, task) => {
         if (err) {
             console.log("trouble finding the entry with id : " + req.params.id);
@@ -149,7 +168,7 @@ app.get('/home/:id/edit', (req, res) => {
     });
 })
 
-app.put("/home/:id/", (req, res) => {
+app.put("/home/:id/",isLoggedIn, (req, res) => {
     Task.findByIdAndUpdate(req.params.id, req.body.task, (err, editedTask) => {
         if (err) {
             console.log("trouble updating the entry with id : " + req.param.id);
@@ -160,7 +179,10 @@ app.put("/home/:id/", (req, res) => {
     })
 });
 
-app.delete("/home/:id/delete", (req, res) => {
+
+
+
+ app.delete("/home/:id/delete",isLoggedIn, (req, res) => {
     Task.findByIdAndDelete(req.params.id, (err, deletedTask) => {
         if (err) {
             console.log("problem encountered while deleting");
@@ -169,71 +191,9 @@ app.delete("/home/:id/delete", (req, res) => {
             res.redirect("/home");
         }
     })
-});
+ });
 
-/*
-app.get('/home',(req,res)=>{
-    Entry.find({},(err,entry)=>{
-        if(err){
-            console.log("error while recieving entries from the database");
-        }else{
-            res.render("home.ejs",{entry:entry});   
-        }
-    })
-});
 
-app.post('/home',(req,res)=>{
-    Entry.create(req.body,(err,entry)=>{
-        if(err){
-            console.log("err has occured while inserting an entrt into the database");
-        }else{
-            res.redirect("/home");
-        }
-    });
-});
-
-app.get('/new',(req,res)=>{
-    res.render('new');
-});
-
-app.get('/home/:id',(req,res)=>{
-     Entry.findById(req.params.id,(err,entry)=>{
-         if(err){
-            console.log("trouble finding the entry with id : "+req.params.id);
-         }else{
-            res.render('entry',{entry:entry});
-         }
-     }) 
-})
-
-app.get('/home/:id/edit',(req,res)=>{
-    Entry.findById(req.params.id,(err,entry)=>{
-        if(err){
-           console.log("trouble finding the entry with id : "+req.params.id);
-        }else{
-           res.render('edit',{entry:entry});
-        }
-    });
-})
-app.put("/home/:id/",(req,res)=>{
-    Entry.findByIdAndUpdate(req.params.id,req.body.entry,(err,ent)=>{
-        if(err){
-            console.log("trouble updating the entry with id : "+req.param.id);
-        }else{
-            res.redirect("/home");
-        }
-    })
-})
-app.delete("/home/:id/delete",(req,res)=>{
-    Entry.findByIdAndDelete(req.params.id,(err,ent)=>{
-        if(err){
-            console.log("problem encountered while deleting");
-        }else{
-            res.redirect("/home");
-        }
-    })
-})
-*/
 app.listen(2023, () => {
     console.log('server is running...')
 });
