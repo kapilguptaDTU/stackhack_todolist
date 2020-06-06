@@ -37,21 +37,21 @@ const uri = "mongodb+srv://abhijeet:dirtyclown@cluster0-lyzlv.mongodb.net/test?r
 // to run in local environment 
 // mongoose.connect("mongodb://localhost/todoList",{ useNewUrlParser: true ,useUnifiedTopology: true });
 // to run in mlab db server
-mongoose.connect( uri,{ useNewUrlParser: true ,useUnifiedTopology: true });
+// mongoose.connect( uri,{ useNewUrlParser: true ,useUnifiedTopology: true });
 
 // KAPIL'S LOCALHOST
-// mongoose.connect('mongodb://localhost:27017/TODO', {
-//     useUnifiedTopology: true,
-//     useNewUrlParser: true
-// }, (err) => {
-//     if (!err) {
-//         console.log('MongoDB connection successful')
-//     } else {
-//         console.log('Error in DB connection' + err)
-//     }
+mongoose.connect('mongodb://localhost:27017/TODO', {
+    useUnifiedTopology: true,
+    useNewUrlParser: true
+}, (err) => {
+    if (!err) {
+        console.log('MongoDB connection successful')
+    } else {
+        console.log('Error in DB connection' + err)
+    }
 
 // https://github.com/kapilguptaDTU/stackhack_todolist.git
-// });
+});
 
 mongoose.set('useFindAndModify', false);
 // app.set('view engine', 'ejs');
@@ -146,6 +146,10 @@ app.post('/home',isLoggedIn, (req, res) => {
             console.log("err has occured while inserting an entry into the database");
         } else {
             // console.log(`a new task has been created : ${task}`);
+            var date=task.dueDate;
+            var newDate = new Date(date.getTime() - date.getTimezoneOffset()*60*1000);
+            console.log(newDate);
+            task.dueDate=newDate;
             task.creator=req.user._id;
             req.user.tasks.push(task._id);
             req.user.save();
@@ -161,8 +165,30 @@ app.get('/home/:id/edit',isLoggedIn, (req, res) => {
         if (err) {
             console.log("trouble finding the entry with id : " + req.params.id);
         } else {
+
+
+            function formatDate(d) {
+                date = new Date(d)
+                var dd = date.getDate();
+                var mm = date.getMonth() + 1;
+                var yyyy = date.getFullYear();
+                if (dd < 10) {
+                    dd = '0' + dd
+                }
+                if (mm < 10) {
+                    mm = '0' + mm
+                };
+                return d = yyyy + '-' + mm + '-' + dd 
+            }
+
+            var dat=task.dueDate;
+            var datt=formatDate(dat);
+
+
+
             res.render('todo/edit', {
-                task: task
+                task: task,
+                datt:datt
             });
         }
     });
@@ -208,14 +234,7 @@ app.get("/register", function (req, res) {
 //handle sign up logic
 app.post("/register", function (req, res) {
     var newUser = new User({
-        username: req.body.username,
-        mobile: req.body.mobile,
-        state: req.body.state,
-        city: req.body.city,
-        highscore: '0',
-        profileImage: req.body.profileImage,
-        description: req.body.description
-
+        username: req.body.username
     });
     User.register(newUser, req.body.password, function (err, user) {
         if (err) {

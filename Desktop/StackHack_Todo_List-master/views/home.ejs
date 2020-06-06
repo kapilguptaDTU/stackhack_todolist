@@ -81,7 +81,12 @@
                 </li>
 
             </ul>
+            
             <span class="navbar-text">
+                    <form id="input-form" class="form-inline"  style="flex-flow:inherit;">
+                            <input id="input-country"class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search">
+                            <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                          </form>
                 <% if(!currentUser){%>
                     <a class="nav-link" href="/login" style="display:inline-block;">LOGIN
                         <span class="sr-only">(current)</span>
@@ -96,6 +101,7 @@
                         <%}%>
 
             </span>
+
         </div>
     </nav>
 
@@ -103,17 +109,25 @@
 
 
 
-
-
-
-
-
-
-    <h1>HOME</h1>
     <a class="btn btn-sm btn-success " style="display: table-caption;" href="/new">
         <h4 class="a">NEW</h4>
     </a>
-
+    <div class="alarm-clock">
+            <div class="date">
+                <span class="month"></span>
+                <span class="day"></span>,
+                <span class="year"></span>
+            </div>
+        
+            <div class="time">
+                <span class="hours"></span>
+                <span class="colon">:</span>
+                <span class="minutes"></span>
+                <span class="colon">:</span>
+                <span class="seconds"></span>
+            </div>
+        </div>
+    </div>
 
     <div class="container">
         <div class="wrapper">
@@ -169,6 +183,8 @@
     <script src="/js/select2.min.js"></script>
     <!--===============================================================================================-->
     <script src="/js/main.js"></script>
+    <script src="/js/search.js"></script>
+    
     <!-- ===================================== -->
 
 
